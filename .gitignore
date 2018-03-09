@@ -15,3 +15,6 @@ Desktop.ini
 # Unity
 /Library
 /Temp
+
+Assets/Plugins
+Assets/Plugins.meta
