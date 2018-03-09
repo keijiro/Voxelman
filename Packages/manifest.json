@@ -1,0 +1,16 @@
+{
+	"dependencies": {
+		"com.unity.burst": "0.1.29"
+	},
+	"testables": [
+        "com.unity.collections",
+        "com.unity.ecs",
+        "com.unity.ecs.hybrid",
+        "com.unity.transforms",
+        "com.unity.transforms2d",
+        "com.unity.transforms.hybrid",
+        "com.unity.jobs",
+        "com.unity.mathematics"
+	],
+	"registry": "https://staging-packages.unity.com"
+}

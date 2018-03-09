@@ -1,0 +1,11 @@
+{
+    "name": "Unity.Jobs",
+    "references": [
+        "Unity.Mathematics",
+        "Unity.Collections"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+	"allowUnsafeCode": true
+}

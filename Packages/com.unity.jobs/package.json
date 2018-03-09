@@ -1,0 +1,11 @@
+{
+  "name": "com.unity.jobs",
+  "version": "0.0.1",
+  "unity": "2018.1",
+  "description": "Additional C# jobs types. IJobParallelForBatch and IJobParallelForFilter",
+  "keywords": [
+    "ads",
+    "unity"
+  ],
+  "category": "AssetStore/Unity"
+}

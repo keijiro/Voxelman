@@ -1,0 +1,11 @@
+{
+  "name": "com.unity.mathematics",
+  "version": "0.0.1",
+  "unity": "2018.1",
+  "description": "Unity SIMD Math",
+  "keywords": [
+    "ads",
+    "unity"
+  ],
+  "category": "AssetStore/Unity"
+}

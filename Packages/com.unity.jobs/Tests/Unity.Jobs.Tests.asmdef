@@ -1,0 +1,15 @@
+{
+    "name": "Unity.Jobs.Tests",
+    "references": [
+        "Unity.Jobs",
+        "Unity.Collections",
+        "Unity.Mathematics"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

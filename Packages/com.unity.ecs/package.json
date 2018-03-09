@@ -1,0 +1,10 @@
+{
+  "name": "com.unity.ecs",
+  "version": "0.0.1",
+  "unity": "2018.1",
+  "description": "Unity Entity Component System",
+  "keywords": [
+    "ecs",
+    "unity"
+  ]
+}

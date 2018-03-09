@@ -1,0 +1,10 @@
+{
+  "name": "com.unity.transforms",
+  "version": "0.0.1",
+  "unity": "2018.1",
+  "description": "Unity Transform Components - For Entity Component System",
+  "keywords": [
+    "unity",
+    "ecs"
+  ]
+}

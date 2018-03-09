@@ -1,0 +1,11 @@
+{
+    "name": "Unity.Entities",
+    "references": [
+        "Unity.Collections",
+        "Unity.Burst"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+	"allowUnsafeCode": true
+}
