@@ -203,10 +203,10 @@ GameObject:
   m_Component:
   - component: {fileID: 236591756}
   - component: {fileID: 236591755}
-  - component: {fileID: 236591754}
   - component: {fileID: 236591757}
   - component: {fileID: 236591759}
   - component: {fileID: 236591758}
+  - component: {fileID: 236591754}
   m_Layer: 0
   m_Name: Spawner 2
   m_TagString: Untagged
@@ -226,7 +226,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    count: 10
+    spawnCount: 3
+    rendererSettings:
+      mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+      material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
+      castShadows: 0
+      receiveShadows: 0
 --- !u!114 &236591755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -284,63 +289,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2327f3002fc94f2b91d287c740439550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &703225933
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 703225936}
-  - component: {fileID: 703225935}
-  - component: {fileID: 703225934}
-  m_Layer: 0
-  m_Name: Cube
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &703225934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 703225933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b0fd4427893a4a16ba0c267dfd00217, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedData:
-    mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-    material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
-    castShadows: 0
-    receiveShadows: 0
---- !u!114 &703225935
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 703225933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &703225936
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 703225933}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1320591806
 GameObject:
   m_ObjectHideFlags: 0
@@ -350,10 +298,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1320591807}
   - component: {fileID: 1320591809}
-  - component: {fileID: 1320591808}
   - component: {fileID: 1320591810}
   - component: {fileID: 1320591812}
   - component: {fileID: 1320591811}
+  - component: {fileID: 1320591808}
   m_Layer: 0
   m_Name: Spawner 1
   m_TagString: Untagged
@@ -386,7 +334,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    count: 5
+    spawnCount: 5
+    rendererSettings:
+      mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+      material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
+      castShadows: 0
+      receiveShadows: 0
 --- !u!114 &1320591809
 MonoBehaviour:
   m_ObjectHideFlags: 0
