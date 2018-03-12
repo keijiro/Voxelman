@@ -1,16 +1,15 @@
 {
-	"dependencies": {
-		"com.unity.burst": "0.1.29"
+	"dependencies":{
+		"com.unity.jobs":"0.0.3",
+		"com.unity.entities":"0.0.7",
+		"com.unity.collections":"0.0.4",
+		"com.unity.burst": "0.1.31",
+		"com.unity.mathematics":"0.0.7"
 	},
 	"testables": [
         "com.unity.collections",
-        "com.unity.ecs",
-        "com.unity.ecs.hybrid",
-        "com.unity.transforms",
-        "com.unity.transforms2d",
-        "com.unity.transforms.hybrid",
-        "com.unity.jobs",
-        "com.unity.mathematics"
+        "com.unity.entities",
+        "com.unity.jobs"
 	],
 	"registry": "https://staging-packages.unity.com"
 }
