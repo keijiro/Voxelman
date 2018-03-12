@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using Boo.Lang;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Collections;
@@ -15,11 +15,13 @@ class SpawnerSystem : ComponentSystem
         public quaternion rotation;
     }
 
+    private XXHash m_Hash;
     private ComponentGroup m_MainGroup;
     private EntityArchetype m_SpinnerArchetype;
 
     protected override void OnCreateManager(int capacity)
     {
+        m_Hash = new XXHash(100);
         m_MainGroup = GetComponentGroup(typeof(SpawnPoint), typeof(Position), typeof(Rotation));
         m_SpinnerArchetype = EntityManager.CreateArchetype(
             typeof(Position), typeof(Rotation), typeof(TransformMatrix),
@@ -28,7 +30,7 @@ class SpawnerSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        var sharedDatas = new List<SpawnPoint>(10);
+        var sharedDatas = new System.Collections.Generic.List<SpawnPoint>(10);
         EntityManager.GetAllUniqueSharedComponentDatas(sharedDatas);
         
         var spawnCount = 0;
@@ -82,7 +84,14 @@ class SpawnerSystem : ComponentSystem
                 EntityManager.Instantiate(instance, clones);
 
                 for (var offs = 0; offs < cloneCount; offs++)
+                {
+                    var pos = tempDatas[i].position + new float3(
+                        m_Hash.Range(-5.0f, 5.0f, seed++),
+                        m_Hash.Range(-5.0f, 5.0f, seed++),
+                        m_Hash.Range(-5.0f, 5.0f, seed++));
+                    EntityManager.SetComponentData(clones[offs], new Position {Value = pos});
                     EntityManager.SetComponentData(clones[offs], new Spinner {seed = seed++});
+                }
 
                 clones.Dispose();
             }
