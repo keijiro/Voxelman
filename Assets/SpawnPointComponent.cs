@@ -1,12 +1,14 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Rendering;
 
-[Serializable]
+// Hybrid style spawn point component
+
+[System.Serializable]
 struct SpawnPoint : ISharedComponentData
 {
-    public int spawnCount;
-    public MeshInstanceRenderer rendererSettings;
+    public int SpawnCount;
+    public float Radius;
+    public MeshInstanceRenderer RendererSettings;
 }
 
 class SpawnPointComponent : SharedComponentDataWrapper<SpawnPoint> { }

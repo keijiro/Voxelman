@@ -226,12 +226,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    spawnCount: 80
-    rendererSettings:
-      mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+    SpawnCount: 20
+    Radius: 1
+    RendererSettings:
+      mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
       material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
-      castShadows: 0
-      receiveShadows: 0
+      castShadows: 1
+      receiveShadows: 1
 --- !u!114 &236591755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,12 +335,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    spawnCount: 40
-    rendererSettings:
+    SpawnCount: 80
+    Radius: 15
+    RendererSettings:
       mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
       material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
-      castShadows: 0
-      receiveShadows: 0
+      castShadows: 1
+      receiveShadows: 1
 --- !u!114 &1320591809
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,38 +1,48 @@
-﻿using Boo.Lang;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Transforms;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Rendering;
 
-class SpawnerSystem : ComponentSystem
+// System implementation for processing SpawnPoints
+
+class SpawnSystem : ComponentSystem
 {
+    // Spawn point data entry for temporary use
     struct TempData
     {
-        public int sharedDataIndex;
-        public Entity sourceEntity;
-        public float3 position;
-        public quaternion rotation;
+        public int SharedDataIndex;
+        public Entity SourceEntity;
+        public float3 Position;
     }
 
-    private XXHash m_Hash;
+    // Spawn point data group used for querying
     private ComponentGroup m_MainGroup;
+
+    // Spinner archetype used for instantiation
     private EntityArchetype m_SpinnerArchetype;
 
     protected override void OnCreateManager(int capacity)
     {
-        m_Hash = new XXHash(100);
-        m_MainGroup = GetComponentGroup(typeof(SpawnPoint), typeof(Position), typeof(Rotation));
+        // Spawn point data group: Only requires SpawnPoint and Position.
+        m_MainGroup = GetComponentGroup(typeof(SpawnPoint), typeof(Position));
+
+        // Spinner archetype: Spinner data, transform and instanced renderer.
         m_SpinnerArchetype = EntityManager.CreateArchetype(
+            typeof(Spinner), typeof(SpinnerOrigin),
             typeof(Position), typeof(Rotation), typeof(TransformMatrix),
-            typeof(Spinner), typeof(MeshInstanceRendererComponent));
+            typeof(MeshInstanceRenderer)
+        );
     }
 
     protected override void OnUpdate()
     {
+        // Spawn point data can be shared between spawn point instances.
+        // Enumerate all the unique data first.
         var sharedDatas = new System.Collections.Generic.List<SpawnPoint>(10);
         EntityManager.GetAllUniqueSharedComponentDatas(sharedDatas);
         
+        // Calculate the total count of the spawn points.
         var spawnCount = 0;
         for (var sharedIndex = 0; sharedIndex < sharedDatas.Count; sharedIndex++)
         {
@@ -40,63 +50,68 @@ class SpawnerSystem : ComponentSystem
             spawnCount += m_MainGroup.CalculateLength();
         }
         
+        // Do nothing if no one is there.
         if (spawnCount == 0) return;
-        
+
+        // Build a simple plain array of spawn points.
         var tempDatas = new NativeArray<TempData>(spawnCount, Allocator.Temp);
-        
+
         spawnCount = 0;
+
         for (var sharedIndex = 0; sharedIndex < sharedDatas.Count; sharedIndex++)
         {
             m_MainGroup.SetFilter(sharedDatas[sharedIndex]);
             
             var entities = m_MainGroup.GetEntityArray();
             var positions = m_MainGroup.GetComponentDataArray<Position>();
-            var rotations = m_MainGroup.GetComponentDataArray<Rotation>();
 
             for (var i = 0; i < entities.Length; i++)
             {
                 tempDatas[spawnCount++] = new TempData
                 {
-                    sharedDataIndex = sharedIndex,
-                    sourceEntity = entities[i],
-                    position = positions[i].Value,
-                    rotation = rotations[i].Value
+                    SharedDataIndex = sharedIndex,
+                    SourceEntity = entities[i],
+                    Position = positions[i].Value
                 };
             }
         }
-        
+
+        // Spawn spinners at the each spawn point.
         var seed = 1;
 
         for (var i = 0; i < spawnCount; i++)
         {
-            var sharedIndex = tempDatas[i].sharedDataIndex;
-            
-            var instance = EntityManager.CreateEntity(m_SpinnerArchetype);
-            EntityManager.SetComponentData(instance, new Position {Value = tempDatas[i].position});
-            EntityManager.SetComponentData(instance, new Rotation {Value = tempDatas[i].rotation});
-            EntityManager.SetComponentData(instance, new Spinner {seed = seed++});
-            EntityManager.AddSharedComponentData(instance, sharedDatas[sharedIndex].rendererSettings);
+            var sharedIndex = tempDatas[i].SharedDataIndex;
 
-            var cloneCount = sharedDatas[sharedIndex].spawnCount - 1;
+            // Create the first entity.
+            var instance = EntityManager.CreateEntity(m_SpinnerArchetype);
+
+            EntityManager.SetComponentData(instance, new Position { Value = tempDatas[i].Position });
+            EntityManager.SetComponentData(instance, new Spinner { Seed = seed++ });
+
+            EntityManager.SetSharedComponentData(instance, sharedDatas[sharedIndex].RendererSettings);
+
+            EntityManager.SetSharedComponentData(instance, new SpinnerOrigin {
+                Origin = tempDatas[i].Position,
+                Radius = sharedDatas[sharedIndex].Radius
+            });
+
+            // Clone the first entity.
+            var cloneCount = sharedDatas[sharedIndex].SpawnCount - 1;
             if (cloneCount > 0)
             {
                 var clones = new NativeArray<Entity>(cloneCount, Allocator.Temp);
                 EntityManager.Instantiate(instance, clones);
 
+                // Set unique data.
                 for (var offs = 0; offs < cloneCount; offs++)
-                {
-                    var pos = tempDatas[i].position + new float3(
-                        m_Hash.Range(-5.0f, 5.0f, seed++),
-                        m_Hash.Range(-5.0f, 5.0f, seed++),
-                        m_Hash.Range(-5.0f, 5.0f, seed++));
-                    EntityManager.SetComponentData(clones[offs], new Position {Value = pos});
-                    EntityManager.SetComponentData(clones[offs], new Spinner {seed = seed++});
-                }
+                    EntityManager.SetComponentData(clones[offs], new Spinner { Seed = seed++ });
 
                 clones.Dispose();
             }
 
-            EntityManager.RemoveComponent(tempDatas[i].sourceEntity, typeof(SpawnPoint));
+            // Remove the spawn point data from the source spawner entity.
+            EntityManager.RemoveComponent(tempDatas[i].SourceEntity, typeof(SpawnPoint));
         }
         
         tempDatas.Dispose();

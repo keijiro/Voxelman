@@ -1,8 +1,15 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
+using Unity.Mathematics;
 	
-[Serializable]
+// Spinner instance data
 struct Spinner : IComponentData
 {
-	public int seed;
+	public int Seed;
+}
+
+// Spinner shared data
+struct SpinnerOrigin : ISharedComponentData
+{
+    public float Radius;
+    public float3 Origin;
 }
