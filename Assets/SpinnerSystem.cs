@@ -33,8 +33,14 @@ class SpinnerSystem : ComponentSystem
         {
             var spinner = m_Data.Spinners[i];
 
+            var noise = new float3(
+                Perlin.Noise(spinner.Seed * 0.153f, time),
+                Perlin.Noise(spinner.Seed * 1.374f, time),
+                Perlin.Noise(spinner.Seed * 0.874f, time)
+            );
+
             m_Data.Positions[i] = new Position {
-                Value = m_Data.Origins[i].Origin + GetRandomVector(spinner.Seed) * m_Data.Origins[i].Radius
+                Value = m_Data.Origins[i].Origin + noise * m_Data.Origins[i].Radius
             };
 
             m_Data.Rotations[i] = new Rotation {
