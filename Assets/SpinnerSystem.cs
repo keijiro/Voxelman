@@ -4,7 +4,47 @@ using Unity.Jobs;
 using Unity.Transforms;
 using Unity.Mathematics;
 
+#if USE_JOB_SYSTEM
+
 class SpinnerSystem : JobComponentSystem
+{
+    [ComputeJobOptimization]
+    struct JobSpinner : IJobProcessComponentData<Spinner, Position, Rotation>
+    {
+        public float Time;
+
+        public void Execute([ReadOnly] ref Spinner spinner, ref Position position, ref Rotation rotation)
+        {
+            var hash = new XXHash(123);
+
+            var noise = new float3(
+                Perlin.Noise(spinner.Seed * 0.153f, Time),
+                Perlin.Noise(spinner.Seed * 1.374f, Time),
+                Perlin.Noise(spinner.Seed * 0.874f, Time)
+            );
+
+            position = new Position {
+                Value = spinner.Origin + noise * spinner.Radius
+            };
+
+            rotation = new Rotation {
+                Value = math.axisAngle(
+                    GetRandomVector(hash, spinner.Seed + 10000),
+                    hash.Range(-10.0f, 10.0f, spinner.Seed + 20000) * Time
+                )
+            };
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        var job = new JobSpinner { Time = UnityEngine.Time.time };
+        return job.Schedule(this, 64, inputDeps);
+    }
+
+#else
+
+class SpinnerSystem : ComponentSystem
 {
     // Data entry for injection
     struct Data
@@ -15,21 +55,16 @@ class SpinnerSystem : JobComponentSystem
         public ComponentDataArray<Rotation> Rotations;
     }
 
-    [ComputeJobOptimization]
-    struct JobData : IJobParallelFor
+    [Inject] private Data m_Data;
+
+    protected override void OnUpdate()
     {
-        [ReadOnly] public ComponentDataArray<Spinner> Spinners;
-        public ComponentDataArray<Position> Positions;
-        public ComponentDataArray<Rotation> Rotations;
+        var hash = new XXHash(123);
+        var time = UnityEngine.Time.time;
 
-        public float Time;
-
-        public void Execute(int index)
+        for (var i = 0; i < m_Data.Length; i++)
         {
-            var time = Time;
-            var hash = new XXHash(123);
-
-            var spinner = Spinners[index];
+            var spinner = m_Data.Spinners[i];
 
             var noise = new float3(
                 Perlin.Noise(spinner.Seed * 0.153f, time),
@@ -37,11 +72,11 @@ class SpinnerSystem : JobComponentSystem
                 Perlin.Noise(spinner.Seed * 0.874f, time)
             );
 
-            Positions[index] = new Position {
+            m_Data.Positions[i] = new Position {
                 Value = spinner.Origin + noise * spinner.Radius
             };
 
-            Rotations[index] = new Rotation {
+            m_Data.Rotations[i] = new Rotation {
                 Value = math.axisAngle(
                     GetRandomVector(hash, spinner.Seed + 10000),
                     hash.Range(-10.0f, 10.0f, spinner.Seed + 20000) * time
@@ -50,23 +85,7 @@ class SpinnerSystem : JobComponentSystem
         }
     }
 
-    [Inject] private Data m_Data;
-
-    protected override void OnCreateManager(int capacity)
-    {
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        var jobs = new JobData {
-            Spinners = m_Data.Spinners,
-            Positions = m_Data.Positions,
-            Rotations = m_Data.Rotations,
-            Time = UnityEngine.Time.time
-        };
-
-        return jobs.Schedule(m_Data.Length, 64, inputDeps);
-    }
+#endif
 
     static float3 GetRandomVector(XXHash hash, int seed)
     {
