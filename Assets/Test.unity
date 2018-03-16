@@ -229,7 +229,7 @@ MonoBehaviour:
     SpawnCount: 20000
     Radius: 20
     RendererSettings:
-      mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+      mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
       material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
       castShadows: 1
       receiveShadows: 1

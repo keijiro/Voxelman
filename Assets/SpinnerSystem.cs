@@ -1,4 +1,6 @@
-﻿using Unity.Entities;
+﻿#define USE_JOB_SYSTEM
+
+using Unity.Entities;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Transforms;
