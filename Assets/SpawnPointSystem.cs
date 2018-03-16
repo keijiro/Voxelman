@@ -29,7 +29,7 @@ class SpawnSystem : ComponentSystem
 
         // Spinner archetype: Spinner data, transform and instanced renderer.
         m_SpinnerArchetype = EntityManager.CreateArchetype(
-            typeof(Spinner), typeof(SpinnerOrigin),
+            typeof(Spinner),
             typeof(Position), typeof(Rotation), typeof(TransformMatrix),
             typeof(MeshInstanceRenderer)
         );
@@ -83,18 +83,18 @@ class SpawnSystem : ComponentSystem
         {
             var sharedIndex = tempDatas[i].SharedDataIndex;
 
-            // Create the first entity.
-            var instance = EntityManager.CreateEntity(m_SpinnerArchetype);
-
-            EntityManager.SetComponentData(instance, new Position { Value = tempDatas[i].Position });
-            EntityManager.SetComponentData(instance, new Spinner { Seed = seed++ });
-
-            EntityManager.SetSharedComponentData(instance, sharedDatas[sharedIndex].RendererSettings);
-
-            EntityManager.SetSharedComponentData(instance, new SpinnerOrigin {
+            // Template instance
+            var template = new Spinner {
+                Seed = seed,
                 Origin = tempDatas[i].Position,
                 Radius = sharedDatas[sharedIndex].Radius
-            });
+            };
+
+            // Create the first entity.
+            var instance = EntityManager.CreateEntity(m_SpinnerArchetype);
+            EntityManager.SetComponentData(instance, new Position { Value = tempDatas[i].Position });
+            EntityManager.SetComponentData(instance, template);
+            EntityManager.SetSharedComponentData(instance, sharedDatas[sharedIndex].RendererSettings);
 
             // Clone the first entity.
             var cloneCount = sharedDatas[sharedIndex].SpawnCount - 1;
@@ -105,10 +105,15 @@ class SpawnSystem : ComponentSystem
 
                 // Set unique data.
                 for (var offs = 0; offs < cloneCount; offs++)
-                    EntityManager.SetComponentData(clones[offs], new Spinner { Seed = seed++ });
+                {
+                    template.Seed++;
+                    EntityManager.SetComponentData(clones[offs], template);
+                }
 
                 clones.Dispose();
             }
+
+            seed += 1 + cloneCount;
 
             // Remove the spawn point data from the source spawner entity.
             EntityManager.RemoveComponent(tempDatas[i].SourceEntity, typeof(SpawnPoint));

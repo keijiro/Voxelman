@@ -5,11 +5,6 @@ using Unity.Mathematics;
 struct Spinner : IComponentData
 {
 	public int Seed;
-}
-
-// Spinner shared data
-struct SpinnerOrigin : ISharedComponentData
-{
-    public float Radius;
     public float3 Origin;
+    public float Radius;
 }
