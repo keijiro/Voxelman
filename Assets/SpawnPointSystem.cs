@@ -17,19 +17,19 @@ class SpawnSystem : ComponentSystem
     }
 
     // Spawn point data group used for querying
-    private ComponentGroup m_MainGroup;
+    private ComponentGroup _mainGroup;
 
-    // Spinner archetype used for instantiation
-    private EntityArchetype m_SpinnerArchetype;
+    // Voxel archetype used for instantiation
+    private EntityArchetype _voxelArchetype;
 
     protected override void OnCreateManager(int capacity)
     {
         // Spawn point data group: Only requires SpawnPoint and Position.
-        m_MainGroup = GetComponentGroup(typeof(SpawnPoint), typeof(Position));
+        _mainGroup = GetComponentGroup(typeof(SpawnPoint), typeof(Position));
 
-        // Spinner archetype: Spinner data, transform and instanced renderer.
-        m_SpinnerArchetype = EntityManager.CreateArchetype(
-            typeof(Spinner),
+        // Voxel archetype: Voxel data, transform and instanced renderer.
+        _voxelArchetype = EntityManager.CreateArchetype(
+            typeof(Voxel),
             typeof(Position), typeof(Rotation), typeof(TransformMatrix),
             typeof(MeshInstanceRenderer)
         );
@@ -46,10 +46,10 @@ class SpawnSystem : ComponentSystem
         var spawnCount = 0;
         for (var sharedIndex = 0; sharedIndex < sharedDatas.Count; sharedIndex++)
         {
-            m_MainGroup.SetFilter(sharedDatas[sharedIndex]);
-            spawnCount += m_MainGroup.CalculateLength();
+            _mainGroup.SetFilter(sharedDatas[sharedIndex]);
+            spawnCount += _mainGroup.CalculateLength();
         }
-        
+
         // Do nothing if no one is there.
         if (spawnCount == 0) return;
 
@@ -60,10 +60,10 @@ class SpawnSystem : ComponentSystem
 
         for (var sharedIndex = 0; sharedIndex < sharedDatas.Count; sharedIndex++)
         {
-            m_MainGroup.SetFilter(sharedDatas[sharedIndex]);
+            _mainGroup.SetFilter(sharedDatas[sharedIndex]);
             
-            var entities = m_MainGroup.GetEntityArray();
-            var positions = m_MainGroup.GetComponentDataArray<Position>();
+            var entities = _mainGroup.GetEntityArray();
+            var positions = _mainGroup.GetComponentDataArray<Position>();
 
             for (var i = 0; i < entities.Length; i++)
             {
@@ -76,44 +76,36 @@ class SpawnSystem : ComponentSystem
             }
         }
 
-        // Spawn spinners at the each spawn point.
-        var seed = 1;
-
+        // Spawn voxels at the each spawn point.
         for (var i = 0; i < spawnCount; i++)
         {
             var sharedIndex = tempDatas[i].SharedDataIndex;
+            var ext = sharedDatas[sharedIndex].Extent;
+            var reso = sharedDatas[sharedIndex].Resolution;
 
-            // Template instance
-            var template = new Spinner {
-                Seed = seed,
-                Origin = tempDatas[i].Position,
-                Radius = sharedDatas[sharedIndex].Radius
-            };
+            // Instantiation
+            var instances = new NativeArray<Entity>(reso.x * reso.y * reso.z, Allocator.Temp);
+            EntityManager.CreateEntity(_voxelArchetype, instances);
 
-            // Create the first entity.
-            var instance = EntityManager.CreateEntity(m_SpinnerArchetype);
-            EntityManager.SetComponentData(instance, new Position { Value = tempDatas[i].Position });
-            EntityManager.SetComponentData(instance, template);
-            EntityManager.SetSharedComponentData(instance, sharedDatas[sharedIndex].RendererSettings);
-
-            // Clone the first entity.
-            var cloneCount = sharedDatas[sharedIndex].SpawnCount - 1;
-            if (cloneCount > 0)
+            // Initialization
+            var offs = 0;
+            for (var ix = 0; ix < reso.x; ix++)
             {
-                var clones = new NativeArray<Entity>(cloneCount, Allocator.Temp);
-                EntityManager.Instantiate(instance, clones);
-
-                // Set unique data.
-                for (var offs = 0; offs < cloneCount; offs++)
+                var x = math.lerp(-ext.x, ext.x, (float)ix / reso.x);
+                for (var iy = 0; iy < reso.y; iy++)
                 {
-                    template.Seed++;
-                    EntityManager.SetComponentData(clones[offs], template);
+                    var y = math.lerp(-ext.y, ext.y, (float)iy / reso.y);
+                    for (var iz = 0; iz < reso.z; iz++)
+                    {
+                        var z = math.lerp(-ext.z, ext.z, (float)iz / reso.z);
+                        EntityManager.SetComponentData(instances[offs], new Position { Value = new float3(x, y, z) });
+                        EntityManager.SetSharedComponentData(instances[offs], sharedDatas[sharedIndex].RendererSettings);
+                        offs++;
+                    }
                 }
-
-                clones.Dispose();
             }
 
-            seed += 1 + cloneCount;
+            instances.Dispose();
 
             // Remove the spawn point data from the source spawner entity.
             EntityManager.RemoveComponent(tempDatas[i].SourceEntity, typeof(SpawnPoint));

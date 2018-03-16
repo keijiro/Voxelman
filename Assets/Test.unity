@@ -194,102 +194,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &236591753
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 236591756}
-  - component: {fileID: 236591755}
-  - component: {fileID: 236591757}
-  - component: {fileID: 236591759}
-  - component: {fileID: 236591758}
-  - component: {fileID: 236591754}
-  m_Layer: 0
-  m_Name: Spawner 2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &236591754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 236591753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73ba2d623c2159044b8e8923b9202f10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedData:
-    SpawnCount: 20000
-    Radius: 20
-    RendererSettings:
-      mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-      material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
-      castShadows: 1
-      receiveShadows: 1
---- !u!114 &236591755
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 236591753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &236591756
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 236591753}
-  m_LocalRotation: {x: 0.46515697, y: 0.39385575, z: -0.016155811, w: 0.7926195}
-  m_LocalPosition: {x: 10, y: 0, z: -2.71}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 48.6, y: 67.13, z: 31.02}
---- !u!114 &236591757
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 236591753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 168b0e3756704251859c57ee75912ca1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &236591758
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 236591753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f45258a2afd45afabd0d78ae4fcf414, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &236591759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 236591753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2327f3002fc94f2b91d287c740439550, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1320591806
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,8 +239,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    SpawnCount: 20000
-    Radius: 18
+    Extent:
+      x: 2
+      y: 2
+      z: 2
+    Resolution:
+      x: 20
+      y: 20
+      z: 20
     RendererSettings:
       mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
       material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
