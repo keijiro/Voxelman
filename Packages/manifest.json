@@ -1,15 +1,15 @@
 {
-	"dependencies":{
-		"com.unity.jobs":"0.0.3",
-		"com.unity.entities":"0.0.7",
-		"com.unity.collections":"0.0.4",
-		"com.unity.burst": "0.1.31",
-		"com.unity.mathematics":"0.0.7"
-	},
-	"testables": [
-        "com.unity.collections",
-        "com.unity.entities",
-        "com.unity.jobs"
-	],
-	"registry": "https://staging-packages.unity.com"
+  "dependencies": {
+    "com.unity.jobs": "0.0.6",
+    "com.unity.entities": "0.0.10",
+    "com.unity.collections": "0.0.7",
+    "com.unity.burst": "0.2.1",
+    "com.unity.mathematics": "0.0.8",
+    "com.unity.package-manager-ui": "1.8.6",
+    "com.unity.ads": "exclude",
+    "com.unity.analytics": "exclude",
+    "com.unity.standardevents": "exclude",
+    "com.unity.purchasing": "exclude"
+  },
+  "registry": "https://staging-packages.unity.com"
 }
