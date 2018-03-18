@@ -27,11 +27,9 @@ class SpawnSystem : ComponentSystem
         // Spawn point data group: Only requires SpawnPoint and Position.
         _mainGroup = GetComponentGroup(typeof(SpawnPoint), typeof(Position));
 
-        // Voxel archetype: Voxel data, transform and instanced renderer.
+        // Voxel archetype: Voxel data and instanced renderer.
         _voxelArchetype = EntityManager.CreateArchetype(
-            typeof(Voxel),
-            typeof(Position), typeof(Rotation), typeof(TransformMatrix),
-            typeof(MeshInstanceRenderer)
+            typeof(Voxel), typeof(Position), typeof(MeshInstanceRenderer)
         );
     }
 

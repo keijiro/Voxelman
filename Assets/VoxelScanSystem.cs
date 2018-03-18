@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using System.Collections.Generic;
+using Unity.Entities;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Transforms;
@@ -7,61 +8,136 @@ using UnityEngine;
 
 class VoxelScanSystem : JobComponentSystem
 {
-    // Data entry for injection
-    struct Data
-    {
-        [ReadOnly] public ComponentDataArray<Position> Positions;
-        public ComponentDataArray<Voxel> Voxels;
-        public int Length;
+    // Used for collecting shared component data
+    List<VoxelScan> _uniqueTypes = new List<VoxelScan>(10);
+
+    // Group for querying (Position + VoxelScan)
+    ComponentGroup _group;
+
+    // Buffrs for storing scan results
+    List<NativeArray<float4>> _resultBuffers = new List<NativeArray<float4>>();
+
+    public int BufferCount {
+        get { return _resultBuffers.Count; }
     }
 
-    [Inject] Data _data;
-    
+    public NativeArray<float4> GetBuffer(int index)
+    {
+        return _resultBuffers[index];
+    }
+
+    int _hashSeed;
+
+    // A job that transfers raycast results to a native array.
     [ComputeJobOptimization]
     struct TransferJob : IJobParallelFor
-    {
-        [ReadOnly] public NativeArray<RaycastHit> RaycastHits;
-        public ComponentDataArray<Voxel> Voxels;
-
-        public void Execute(int i)
-        {
-            Voxels[i] = new Voxel { Filled = RaycastHits[i].distance < 0.05f };
-        }
-    }
-
-    [ComputeJobOptimization]
-    struct Dispose : IJob
     {
         [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<RaycastCommand> RaycastCommands;
         [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<RaycastHit> RaycastHits;
 
-        public void Execute()
+        public NativeArray<float4> Destination;
+
+        public void Execute(int i)
         {
+            var p = RaycastCommands[i].from;
+            var w = RaycastHits[i].distance > 0 ? 1.0f : 0.0f;
+            Destination[i] = new float4(p.x, p.y, p.z, w);
         }
+    }
+
+    protected override void OnCreateManager(int capacity)
+    {
+        _group = GetComponentGroup(typeof(Position), typeof(VoxelScan));
+    }
+
+    JobHandle BuildJob(VoxelScan scan, float3 origin, JobHandle deps)
+    {
+        var ext = scan.Extent;
+        var reso = scan.Resolution;
+        var total = reso.x * reso.y * reso.z;
+
+        var commands = new NativeArray<RaycastCommand>(total, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        var hits = new NativeArray<RaycastHit>(total, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
+        var hash = new XXHash(_hashSeed++);
+
+        var scale = ext / reso;
+        var dist = math.max(math.max(scale.x, scale.y), scale.z);
+
+        var i = 0;
+        var seed = 0;
+        for (var ix = 0; ix < reso.x; ix++)
+        {
+            var x = math.lerp(-ext.x, ext.x, (float)ix / reso.x);
+            for (var iy = 0; iy < reso.y; iy++)
+            {
+                var y = math.lerp(-ext.y, ext.y, (float)iy / reso.y);
+                for (var iz = 0; iz < reso.z; iz++)
+                {
+                    var z = math.lerp(-ext.z, ext.z, (float)iz / reso.z);
+                    var p = new float3(x, y, z);
+
+                    var d = math.normalize(new float3(
+                        hash.Range(-1.0f, 1.0f, seed++),
+                        hash.Range(-1.0f, 1.0f, seed++),
+                        hash.Range(-1.0f, 1.0f, seed++)
+                    ));
+
+                    commands[i++] = new RaycastCommand(p - d * dist, d, dist);
+                }
+            }
+        }
+
+        // Raycast job
+        deps = RaycastCommand.ScheduleBatch(commands, hits, 1, deps);
+
+        // Transfer results to a native array.
+        var results = new NativeArray<float4>(total, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        _resultBuffers.Add(results);
+
+        var transferJob = new TransferJob {
+            RaycastCommands = commands,
+            RaycastHits = hits,
+            Destination = results
+        };
+
+        return transferJob.Schedule(total, 1, deps);
+    }
+
+    void DisposeResultBuffers()
+    {
+        for (var i = 0; i < _resultBuffers.Count; i++)
+            _resultBuffers[i].Dispose();
+
+        _resultBuffers.Clear();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var commands = new NativeArray<RaycastCommand>(_data.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-        var hits = new NativeArray<RaycastHit>(_data.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        DisposeResultBuffers();
 
-        for (var i = 0; i < _data.Length; i++)
-            commands[i] = new RaycastCommand(_data.Positions[i].Value, Vector3.left, 0.05f);
+        EntityManager.GetAllUniqueSharedComponentDatas(_uniqueTypes);
 
-        var raycastJob = RaycastCommand.ScheduleBatch(commands, hits, 1, inputDeps);
+        for (var i = 0; i < _uniqueTypes.Count; i++)
+        {
+            var voxelScan = _uniqueTypes[i];
 
-        var transfer = new TransferJob {
-            RaycastHits = hits,
-            Voxels = _data.Voxels
-        };
+            _group.SetFilter(voxelScan);
 
-        var transferJob = transfer.Schedule(_data.Length, 64, raycastJob);
+            var positions = _group.GetComponentDataArray<Position>();
 
-        var disposeJob = new Dispose {
-            RaycastCommands = commands,
-            RaycastHits = hits
-        };
+            for (var j = 0; j < positions.Length; j++)
+                inputDeps = BuildJob(voxelScan, positions[j].Value, inputDeps);
+        }
 
-        return disposeJob.Schedule(transferJob);
+        _uniqueTypes.Clear();
+        inputDeps.Complete();
+
+        return inputDeps;
+    }
+
+    protected override void OnDestroyManager()
+    {
+        DisposeResultBuffers();
     }
 }
