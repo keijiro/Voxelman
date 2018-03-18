@@ -1,10 +1,11 @@
-using Unity.Collections;
-using Unity.Entities;
-using Unity.Mathematics;
+﻿using Unity.Entities;
+using Unity.Rendering;
 
+[System.Serializable]
 struct VoxelBuffer : ISharedComponentData
 {
-    public NativeArray<float4> Buffer;
+    public int MaxVoxelCount;
+    public MeshInstanceRenderer RendererSettings;
 }
 
 class VoxelBufferComponent : SharedComponentDataWrapper<VoxelBuffer> {}

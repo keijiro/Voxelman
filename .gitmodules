@@ -1,0 +1,4 @@
+[submodule "Packages/jp.keijiro.neolowman"]
+	path = Packages/jp.keijiro.neolowman
+	url = git@github.com:keijiro/NeoLowMan.git
+	branch = upm
