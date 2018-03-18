@@ -9,7 +9,8 @@
     "com.unity.ads": "exclude",
     "com.unity.analytics": "exclude",
     "com.unity.standardevents": "exclude",
-    "com.unity.purchasing": "exclude"
+    "com.unity.purchasing": "exclude",
+    "com.unity.postprocessing": "2.0.1-beta"
   },
   "registry": "https://staging-packages.unity.com"
 }
