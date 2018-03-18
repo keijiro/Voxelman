@@ -20,7 +20,7 @@ class VoxelBufferSystem : ComponentSystem
 
         // Voxel archetype: Voxel data, transform and instanced renderer.
         _voxelArchetype = EntityManager.CreateArchetype(
-            typeof(Voxel), typeof(Position), typeof(TransformMatrix), typeof(MeshInstanceRenderer)
+            typeof(Voxel), typeof(TransformMatrix), typeof(MeshInstanceRenderer)
         );
     }
 
