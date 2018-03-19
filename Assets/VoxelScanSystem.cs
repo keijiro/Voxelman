@@ -11,6 +11,27 @@ class VoxelScanSystem : JobComponentSystem
     ComponentGroup _scanGroup;
     ComponentGroup _voxelGroup;
 
+    [ComputeJobOptimization]
+    struct SetupJob : IJobParallelFor
+    {
+        public NativeArray<RaycastCommand> Commands;
+
+        public float3 Extent;
+        public int3 Resolution;
+
+        public void Execute(int i)
+        {
+            var ix = i % Resolution.x;
+            var iy = i / Resolution.x;
+
+            var x = math.lerp(-Extent.x, Extent.x, (float)ix / Resolution.x);
+            var y = math.lerp(-Extent.y, Extent.y, (float)iy / Resolution.y);
+
+            var p = new float3(x, y, -Extent.z);
+            Commands[i] = new RaycastCommand(p, new float3(0, 0, 1), Extent.z * 2);
+        }
+    }
+
     // A job that transfers raycast results to a voxel.
     struct TransferJob : IJob
     {
@@ -52,23 +73,16 @@ class VoxelScanSystem : JobComponentSystem
     {
         var total = reso.x * reso.y;
 
-        var commands = new NativeArray<RaycastCommand>(total, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-        var hits = new NativeArray<RaycastHit>(total, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        var commands = new NativeArray<RaycastCommand>(total, Allocator.TempJob);
+        var hits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
 
-        var scale = ext / reso;
-        var vz = new float3(0, 0, 1);
+        var setupJob = new SetupJob {
+            Commands = commands,
+            Extent = ext,
+            Resolution = reso
+        };
 
-        var i = 0;
-        for (var ix = 0; ix < reso.x; ix++)
-        {
-            var x = math.lerp(-ext.x, ext.x, (float)ix / reso.x);
-            for (var iy = 0; iy < reso.y; iy++)
-            {
-                var y = math.lerp(-ext.y, ext.y, (float)iy / reso.y);
-                var p = new float3(x, y, -ext.z);
-                commands[i++] = new RaycastCommand(p, vz, ext.z * 2);
-            }
-        }
+        deps = setupJob.Schedule(total, 1, deps);
 
         // Raycast job
         deps = RaycastCommand.ScheduleBatch(commands, hits, 1, deps);
