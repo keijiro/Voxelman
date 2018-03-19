@@ -6,3 +6,10 @@
 	path = Packages/jp.keijiro.cmu-mocap
 	url = git@github.com:keijiro/CMUMocap.git
 	branch = upm
+[submodule "Packages/jp.keijiro.test-assets"]
+	path = Packages/jp.keijiro.test-assets
+	url = git@github.com:keijiro/jp.keijiro.test-assets.git
+[submodule "Packages/jp.keijiro.klak"]
+	path = Packages/jp.keijiro.klak
+	url = git@github.com:keijiro/Klak.git
+	branch = upm
