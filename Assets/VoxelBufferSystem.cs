@@ -4,13 +4,13 @@ using Unity.Transforms;
 using Unity.Collections;
 using Unity.Rendering;
 
-// Voxel renderer system
+// Voxel buffer system
 // Instantiates lots of voxels for instanced mesh renderers.
 
-class VoxelRendererSystem : ComponentSystem
+class VoxelBufferSystem : ComponentSystem
 {
-    // Used for enumerate renderers
-    List<VoxelRenderer> _uniques = new List<VoxelRenderer>();
+    // Used for enumerate buffers
+    List<VoxelBuffer> _uniques = new List<VoxelBuffer>();
     ComponentGroup _group;
 
     // Voxel archetype used for instantiation
@@ -18,7 +18,7 @@ class VoxelRendererSystem : ComponentSystem
 
     protected override void OnCreateManager(int capacity)
     {
-        _group = GetComponentGroup(typeof(VoxelRenderer));
+        _group = GetComponentGroup(typeof(VoxelBuffer));
 
         _voxelArchetype = EntityManager.CreateArchetype(
             typeof(Voxel), typeof(TransformMatrix), typeof(MeshInstanceRenderer)
@@ -27,7 +27,7 @@ class VoxelRendererSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        // Enumerate all the renderers.
+        // Enumerate all the buffers.
         EntityManager.GetAllUniqueSharedComponentDatas(_uniques);
         for (var i = 0; i < _uniques.Count; i++)
         {
@@ -35,7 +35,7 @@ class VoxelRendererSystem : ComponentSystem
 
             // Get a copy of the entity array.
             // Don't use the iterator directly because we're going to remove
-            // the renderer components; the iterator will be invalidated.
+            // the buffer components; the iterator will be invalidated.
             var iterator = _group.GetEntityArray();
             var entities = new NativeArray<Entity>(iterator.Length, Allocator.Temp);
             iterator.CopyTo(entities);
@@ -56,8 +56,8 @@ class VoxelRendererSystem : ComponentSystem
                     clones.Dispose();
                 }
 
-                // Remove the renderer component from the entity.
-                EntityManager.RemoveComponent(entities[j], typeof(VoxelRenderer));
+                // Remove the buffer component from the entity.
+                EntityManager.RemoveComponent(entities[j], typeof(VoxelBuffer));
             }
 
             entities.Dispose();

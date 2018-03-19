@@ -1,14 +1,14 @@
 ﻿using Unity.Entities;
 using Unity.Rendering;
 
-// Voxel renderer component
+// Voxel buffer component
 // Instantiates lots of voxels for instanced mesh renderers.
 
 [System.Serializable]
-struct VoxelRenderer : ISharedComponentData
+struct VoxelBuffer : ISharedComponentData
 {
     public int MaxVoxelCount;
     public MeshInstanceRenderer RendererSettings;
 }
 
-class VoxelRendererComponent : SharedComponentDataWrapper<VoxelRenderer> {}
+class VoxelBufferComponent : SharedComponentDataWrapper<VoxelBuffer> {}
