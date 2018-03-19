@@ -17,6 +17,7 @@ MonoBehaviour:
   - {fileID: 114970411366380324}
   - {fileID: 114156253523388160}
   - {fileID: 114112235293671134}
+  - {fileID: 114301540067272290}
 --- !u!114 &114094490420978152
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -135,8 +136,8 @@ MonoBehaviour:
     overrideState: 1
     value: 0.53
   contrast:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 4
   mixerRedOutRedIn:
     overrideState: 0
     value: 100
@@ -363,6 +364,48 @@ MonoBehaviour:
     overrideState: 1
     value: 0.1
   fastMode:
+    overrideState: 0
+    value: 0
+--- !u!114 &114301540067272290
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48a79b01ea5641d4aa6daa2e23605641, type: 3}
+  m_Name: Bloom
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
+  intensity:
+    overrideState: 1
+    value: 0.1
+  threshold:
+    overrideState: 1
+    value: 0
+  softKnee:
+    overrideState: 0
+    value: 0.5
+  diffusion:
+    overrideState: 0
+    value: 7
+  anamorphicRatio:
+    overrideState: 0
+    value: 0
+  color:
+    overrideState: 0
+    value: {r: 1, g: 1, b: 1, a: 1}
+  fastMode:
+    overrideState: 0
+    value: 0
+  dirtTexture:
+    overrideState: 0
+    value: {fileID: 0}
+  dirtIntensity:
     overrideState: 0
     value: 0
 --- !u!114 &114734298998354662

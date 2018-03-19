@@ -23,10 +23,13 @@ class VoxelAnimationSystem : JobComponentSystem
             // Current position
             var pos = math.mul(matrix.Value, new float4(0, 0, 0, 1)).xyz;
 
+            // Velocity
+            var vel = new float3(0.1f, -3, 0.3f) * (rand2 + 0.1f) * dt;
+
             // Transform matrices
             var m1 = math.translate(-pos);
             var m2 = math.scale(new float3(scale, scale, scale));
-            var m3 = math.translate(pos + new float3(0.2f, -4, 0.6f) * rand2 * dt);
+            var m3 = math.translate(pos + vel);
 
             // Apply these matrices.
             matrix = new TransformMatrix {
