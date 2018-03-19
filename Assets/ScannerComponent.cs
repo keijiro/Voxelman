@@ -2,10 +2,10 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [System.Serializable]
-struct VoxelScan : IComponentData
+struct Scanner : IComponentData
 {
     public float3 Extent;
     public int3 Resolution;
 }
 
-class VoxelScanComponent : ComponentDataWrapper<VoxelScan> {}
+class ScannerComponent : ComponentDataWrapper<Scanner> {}

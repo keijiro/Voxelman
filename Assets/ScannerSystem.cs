@@ -6,10 +6,10 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 
-unsafe class VoxelScanSystem : JobComponentSystem
+unsafe class ScannerSystem : JobComponentSystem
 {
     // Groups used for querying components.
-    ComponentGroup _scanGroup;
+    ComponentGroup _scannerGroup;
     ComponentGroup _voxelGroup;
 
     // Used for sharing a counter between transfer jobs.
@@ -85,7 +85,7 @@ unsafe class VoxelScanSystem : JobComponentSystem
         }
     }
 
-    JobHandle BuildJobChain(float3 origin, VoxelScan scan, JobHandle deps)
+    JobHandle BuildJobChain(float3 origin, Scanner scanner, JobHandle deps)
     {
         // Transform output destination
         var transforms = _voxelGroup.GetComponentDataArray<TransformMatrix>();
@@ -106,7 +106,7 @@ unsafe class VoxelScanSystem : JobComponentSystem
         }
 
         // Total count of rays
-        var total = scan.Resolution.x * scan.Resolution.y;
+        var total = scanner.Resolution.x * scanner.Resolution.y;
 
         // Ray cast command/result array
         var commands = new NativeArray<RaycastCommand>(total, Allocator.TempJob);
@@ -115,8 +115,8 @@ unsafe class VoxelScanSystem : JobComponentSystem
         // 1: Setup job
         var setupJob = new SetupJob {
             Commands = commands,
-            Extent = scan.Extent,
-            Resolution = scan.Resolution
+            Extent = scanner.Extent,
+            Resolution = scanner.Resolution
         };
         deps = setupJob.Schedule(total, 16, deps);
 
@@ -127,7 +127,7 @@ unsafe class VoxelScanSystem : JobComponentSystem
         var transferJob = new TransferJob {
             RaycastCommands = commands,
             RaycastHits = hits,
-            Scale = scan.Extent.x * 2 / scan.Resolution.x,
+            Scale = scanner.Extent.x * 2 / scanner.Resolution.x,
             Transforms = transforms,
             pCounter = _pTransformCount
         };
@@ -138,7 +138,7 @@ unsafe class VoxelScanSystem : JobComponentSystem
 
     protected override void OnCreateManager(int capacity)
     {
-        _scanGroup = GetComponentGroup(typeof(VoxelScan), typeof(Position));
+        _scannerGroup = GetComponentGroup(typeof(Scanner), typeof(Position));
         _voxelGroup = GetComponentGroup(typeof(Voxel), typeof(TransformMatrix));
     }
 
@@ -153,11 +153,11 @@ unsafe class VoxelScanSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var origins = _scanGroup.GetComponentDataArray<Position>();
-        var scans = _scanGroup.GetComponentDataArray<VoxelScan>();
+        var origins = _scannerGroup.GetComponentDataArray<Position>();
+        var scanners = _scannerGroup.GetComponentDataArray<Scanner>();
 
-        for (var i = 0; i < scans.Length; i++)
-            inputDeps = BuildJobChain(origins[i].Value, scans[i], inputDeps);
+        for (var i = 0; i < scanners.Length; i++)
+            inputDeps = BuildJobChain(origins[i].Value, scanners[i], inputDeps);
 
         return inputDeps;
     }
