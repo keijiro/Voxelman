@@ -590,8 +590,8 @@ MonoBehaviour:
       y: 3
       z: 10
     Resolution:
-      x: 280
-      y: 280
+      x: 128
+      y: 128
       z: 1
 --- !u!114 &1320591809
 MonoBehaviour:
@@ -803,7 +803,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    MaxVoxelCount: 4000
+    MaxVoxelCount: 8000
     RendererSettings:
       mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
       material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}
