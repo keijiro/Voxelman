@@ -1,21 +1,29 @@
-﻿using System.Collections.Generic;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 
-class VoxelScanSystem : JobComponentSystem
+unsafe class VoxelScanSystem : JobComponentSystem
 {
+    // Groups used for querying components.
     ComponentGroup _scanGroup;
     ComponentGroup _voxelGroup;
 
+    // Used for sharing a counter between transfer jobs.
+    // Static member field isn't allowed in Burst, so use a pointer.
+    int* _pTransformCount;
+
+    // Setup job: Set up raycast commands in a jobified way.
     [ComputeJobOptimization]
     struct SetupJob : IJobParallelFor
     {
+        // Output
         public NativeArray<RaycastCommand> Commands;
 
+        // Common parameters
         public float3 Extent;
         public int3 Resolution;
 
@@ -32,72 +40,100 @@ class VoxelScanSystem : JobComponentSystem
         }
     }
 
-    // A job that transfers raycast results to a voxel.
-    struct TransferJob : IJob
+    // Transfer job: Transfers raycast results to voxels in a jobified way.
+    [ComputeJobOptimization]
+    struct TransferJob : IJobParallelFor
     {
-        [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<RaycastCommand> RaycastCommands;
-        [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<RaycastHit> RaycastHits;
+        // Input arrays; Will be automatically deallocated.
+        [DeallocateOnJobCompletion] [ReadOnly]
+        public NativeArray<RaycastCommand> RaycastCommands;
 
+        [DeallocateOnJobCompletion] [ReadOnly]
+        public NativeArray<RaycastHit> RaycastHits;
+
+        // Output array; Allowing random access.
+        [NativeDisableParallelForRestriction]
         public ComponentDataArray<TransformMatrix> Transforms;
+
+        // Output counter; Shared between jobs via pointer.
+        [NativeDisableUnsafePtrRestriction] public int* pCounter;
+
+        // Common parameters
         public float Scale;
 
-        public void Execute()
+        public void Execute(int index)
         {
-            var count = 0;
+            // Hit test
+            if (RaycastHits[index].distance <= 0) return;
 
-            for (var i = 0; i < RaycastHits.Length && count < Transforms.Length; i++)
-            {
-                if (RaycastHits[i].distance > 0)
-                {
-                    var from = (float3)RaycastCommands[i].from;
-                    var dist = RaycastHits[i].distance;
-                    var p = from + new float3(0, 0, dist);
-                    Transforms[count++] = new TransformMatrix { Value = new float4x4(
-                        new float4(Scale, 0, 0, 0),
-                        new float4(0, Scale, 0, 0),
-                        new float4(0, 0, Scale, 0),
-                        new float4(p.x, p.y, p.z, 1)) };
-                }
-            }
+            // Retrieve the result.
+            var from = (float3)RaycastCommands[index].from;
+            var dist = RaycastHits[index].distance;
 
-            var nullMatrix = math.translate(new float3(1000, 1000, 1000));
+            var p = from + new float3(0, 0, dist);
+            var matrix = new float4x4(
+                new float4(Scale, 0, 0, 0),
+                new float4(0, Scale, 0, 0),
+                new float4(0, 0, Scale, 0),
+                new float4(p.x, p.y, p.z, 1));
 
-            while (count < Transforms.Length)
-            {
-                Transforms[count++] = new TransformMatrix { Value = nullMatrix };
-            }
+            // Increment the output counter in a thread safe way.
+            var count = System.Threading.Interlocked.Increment(ref *pCounter) - 1;
+
+            // Output
+            Transforms[count % Transforms.Length] = new TransformMatrix { Value = matrix };
         }
     }
 
-    JobHandle BuildJob(float3 origin, float3 ext, int3 reso, JobHandle deps)
+    JobHandle BuildJobChain(float3 origin, VoxelScan scan, JobHandle deps)
     {
-        var total = reso.x * reso.y;
+        // Transform output destination
+        var transforms = _voxelGroup.GetComponentDataArray<TransformMatrix>();
+        if (transforms.Length == 0) return deps;
 
+        // Shared counter initialization/update
+        if (_pTransformCount == null)
+        {
+            // Initialization
+            _pTransformCount = (int*)UnsafeUtility.Malloc(
+                sizeof(int), sizeof(int), Allocator.Persistent);
+            *_pTransformCount = 0;
+        }
+        else
+        {
+            // Wrapping around for avoiding overflow
+            *_pTransformCount %= transforms.Length;
+        }
+
+        // Total count of rays
+        var total = scan.Resolution.x * scan.Resolution.y;
+
+        // Ray cast command/result array
         var commands = new NativeArray<RaycastCommand>(total, Allocator.TempJob);
         var hits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
 
+        // 1: Setup job
         var setupJob = new SetupJob {
             Commands = commands,
-            Extent = ext,
-            Resolution = reso
+            Extent = scan.Extent,
+            Resolution = scan.Resolution
         };
+        deps = setupJob.Schedule(total, 16, deps);
 
-        deps = setupJob.Schedule(total, 1, deps);
+        // 2: Raycast job
+        deps = RaycastCommand.ScheduleBatch(commands, hits, 16, deps);
 
-        // Raycast job
-        deps = RaycastCommand.ScheduleBatch(commands, hits, 1, deps);
-
-        // Transfer results to voxels.
-        var dest = _voxelGroup.GetComponentDataArray<TransformMatrix>();
-
+        // 3: Transfer job
         var transferJob = new TransferJob {
             RaycastCommands = commands,
             RaycastHits = hits,
-            Scale = ext.x * 2 / reso.x,
-            Transforms = dest
+            Scale = scan.Extent.x * 2 / scan.Resolution.x,
+            Transforms = transforms,
+            pCounter = _pTransformCount
         };
+        deps = transferJob.Schedule(total, 16, deps);
 
-        return transferJob.Schedule(deps);
+        return deps;
     }
 
     protected override void OnCreateManager(int capacity)
@@ -106,13 +142,22 @@ class VoxelScanSystem : JobComponentSystem
         _voxelGroup = GetComponentGroup(typeof(Voxel), typeof(TransformMatrix));
     }
 
+    protected override void OnDestroyManager()
+    {
+        if (_pTransformCount != null)
+        {
+            UnsafeUtility.Free(_pTransformCount, Allocator.Persistent);
+            _pTransformCount = null;
+        }
+    }
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var scans = _scanGroup.GetComponentDataArray<VoxelScan>();
         var origins = _scanGroup.GetComponentDataArray<Position>();
+        var scans = _scanGroup.GetComponentDataArray<VoxelScan>();
 
         for (var i = 0; i < scans.Length; i++)
-            inputDeps = BuildJob(origins[i].Value, scans[i].Extent, scans[i].Resolution, inputDeps);
+            inputDeps = BuildJobChain(origins[i].Value, scans[i], inputDeps);
 
         return inputDeps;
     }
