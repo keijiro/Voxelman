@@ -1,6 +1,8 @@
 ﻿using Unity.Entities;
 
-// Voxel component
-// No data included; This is only used to give a tag to entities.
+// Voxel data component
 
-struct Voxel : IComponentData {}
+struct Voxel : IComponentData
+{
+    public int ID;
+}

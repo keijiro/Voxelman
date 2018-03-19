@@ -16,6 +16,9 @@ class VoxelBufferSystem : ComponentSystem
     // Voxel archetype used for instantiation
     EntityArchetype _voxelArchetype;
 
+    // Instance counter used to generate voxel IDs.
+    static int _counter;
+
     protected override void OnCreateManager(int capacity)
     {
         _group = GetComponentGroup(typeof(VoxelBuffer));
@@ -45,6 +48,7 @@ class VoxelBufferSystem : ComponentSystem
             {
                 // Create the first voxel.
                 var voxel = EntityManager.CreateEntity(_voxelArchetype);
+                EntityManager.SetComponentData(voxel, new Voxel { ID = _counter++ });
                 EntityManager.SetSharedComponentData(voxel, _uniques[i].RendererSettings);
 
                 // Clone the first voxel.
@@ -53,6 +57,8 @@ class VoxelBufferSystem : ComponentSystem
                 {
                     var clones = new NativeArray<Entity>(cloneCount, Allocator.Temp);
                     EntityManager.Instantiate(voxel, clones);
+                    for (var k = 0; k < cloneCount; k++)
+                        EntityManager.SetComponentData(clones[k], new Voxel { ID = _counter++ });
                     clones.Dispose();
                 }
 
