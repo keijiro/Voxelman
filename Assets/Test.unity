@@ -912,7 +912,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    MaxVoxelCount: 8000
+    MaxVoxelCount: 12000
     RendererSettings:
       mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
       material: {fileID: 2100000, guid: 804bb1e5c7bcf16498e33fb8ab6c3c57, type: 2}

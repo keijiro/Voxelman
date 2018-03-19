@@ -6,6 +6,7 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 
+[UpdateAfter(typeof(VoxelAnimationSystem))]
 unsafe class ScannerSystem : JobComponentSystem
 {
     // Groups used for querying components.
