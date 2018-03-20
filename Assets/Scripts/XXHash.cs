@@ -18,11 +18,11 @@ public struct XXHash
 
     #region Static Functions
 
-    public static uint GetHash(int data, int seed)
+    public static uint GetHash(uint data, uint seed)
     {
-        uint h32 = (uint)seed + PRIME32_5;
+        uint h32 = seed + PRIME32_5;
         h32 += 4U;
-        h32 += (uint)data * PRIME32_3;
+        h32 += data * PRIME32_3;
         h32 = rotl32(h32, 17) * PRIME32_4;
         h32 ^= h32 >> 15;
         h32 *= PRIME32_2;
@@ -36,42 +36,42 @@ public struct XXHash
 
     #region Struct Implementation
 
-    static int _counter;
+    static uint _counter;
 
-    public int seed;
+    public uint seed;
 
     public static XXHash RandomHash {
         get {
-            return new XXHash((int)XXHash.GetHash(0xcafe, _counter++));
+            return new XXHash(XXHash.GetHash(0xcafe, _counter++));
         }
     }
 
-    public XXHash(int seed)
+    public XXHash(uint seed)
     {
         this.seed = seed;
     }
 
-    public uint GetHash(int data)
+    public uint GetHash(uint data)
     {
         return GetHash(data, seed);
     }
 
-    public int Range(int max, int data)
+    public int Range(int max, uint data)
     {
         return (int)GetHash(data) % max;
     }
 
-    public int Range(int min, int max, int data)
+    public int Range(int min, int max, uint data)
     {
         return (int)GetHash(data) % (max - min) + min;
     }
 
-    public float Value01(int data)
+    public float Value01(uint data)
     {
-        return GetHash(data) / (float)uint.MaxValue;
+        return (GetHash(data) & 0x7fffffffu) / (float)0x7fffffff;
     }
 
-    public float Range(float min, float max, int data)
+    public float Range(float min, float max, uint data)
     {
         return Value01(data) * (max - min) + min;
     }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Collections;
@@ -9,15 +9,15 @@ using Unity.Rendering;
 
 class VoxelBufferSystem : ComponentSystem
 {
-    // Used for enumerate buffers
+    // Used for enumerate buffer components
     List<VoxelBuffer> _uniques = new List<VoxelBuffer>();
     ComponentGroup _group;
 
     // Voxel archetype used for instantiation
     EntityArchetype _voxelArchetype;
 
-    // Instance counter used to generate voxel IDs.
-    static int _counter;
+    // Instance counter used for generating voxel IDs
+    static uint _counter;
 
     protected override void OnCreateManager(int capacity)
     {
@@ -37,13 +37,13 @@ class VoxelBufferSystem : ComponentSystem
             _group.SetFilter(_uniques[i]);
 
             // Get a copy of the entity array.
-            // Don't use the iterator directly because we're going to remove
-            // the buffer components; the iterator will be invalidated.
+            // Don't directly use the iterator -- we're going to remove
+            // the buffer components, and it will invalidate the iterator.
             var iterator = _group.GetEntityArray();
             var entities = new NativeArray<Entity>(iterator.Length, Allocator.Temp);
             iterator.CopyTo(entities);
 
-            // Instantiate voxels within the entities.
+            // Instantiate voxels along with the buffer entities.
             for (var j = 0; j < entities.Length; j++)
             {
                 // Create the first voxel.
@@ -51,7 +51,7 @@ class VoxelBufferSystem : ComponentSystem
                 EntityManager.SetComponentData(voxel, new Voxel { ID = _counter++ });
                 EntityManager.SetSharedComponentData(voxel, _uniques[i].RendererSettings);
 
-                // Clone the first voxel.
+                // Make clones from the first voxel.
                 var cloneCount = _uniques[i].MaxVoxelCount - 1;
                 if (cloneCount > 0)
                 {
