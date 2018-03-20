@@ -1,16 +1,12 @@
 {
   "dependencies": {
-    "com.unity.jobs": "0.0.6",
-    "com.unity.entities": "0.0.10",
-    "com.unity.collections": "0.0.7",
-    "com.unity.burst": "0.2.1",
-    "com.unity.mathematics": "0.0.8",
+    "com.unity.entities": "0.0.11",
     "com.unity.package-manager-ui": "1.8.6",
     "com.unity.ads": "exclude",
     "com.unity.analytics": "exclude",
     "com.unity.standardevents": "exclude",
     "com.unity.purchasing": "exclude",
-    "com.unity.postprocessing": "2.0.1-beta"
+    "com.unity.postprocessing": "2.0.3-preview"
   },
   "registry": "https://staging-packages.unity.com"
 }
