@@ -4,11 +4,11 @@ Voxelman
 ![gif](https://i.imgur.com/NxsT4AK.gif)
 ![gif](https://i.imgur.com/yrpIhfk.gif)
 
-**Voxelman** is an example that shows how to use the new [Entity Component
-System] in an extreme way. Each voxel in the scene is instantiated as an entity,
-and they're controlled by component systems. It also utilizes the C# Job System
-and the asynchronous raycast API to hit the maximum efficiency of multi-core
-processors.
+**Voxelman** is an example that shows how to use the new **[Entity Component
+System]** in an extreme way. Each voxel in the scene is instantiated as an
+entity, and they're controlled by component systems. It also utilizes the **C#
+Job System**, the **Burst compiler** and the **asynchronous raycast** to hit
+the maximum efficiency of multi-core processors.
 
 [Entity Component System]: https://github.com/Unity-Technologies/EntityComponentSystemSamples
 
