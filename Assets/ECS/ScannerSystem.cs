@@ -95,7 +95,6 @@ unsafe class ScannerSystem : JobComponentSystem
     // Build a job chain with a given scanner.
     JobHandle BuildJobChain(float3 origin, Scanner scanner, JobHandle deps)
     {
-        Debug.Log(origin);
         // Transform output destination
         var transforms = _voxelGroup.GetComponentDataArray<TransformMatrix>();
         if (transforms.Length == 0) return deps;
