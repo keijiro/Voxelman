@@ -15,12 +15,12 @@ processors.
 How to play with this thing
 ---------------------------
 
-***Download the beta Editor***
+### Download the beta Editor
 
 This example requires the beta build of Unity Editor. Please see the "What is
 in the build" section in README of the [ECS repository].
 
-***Submodules***
+### Submodules
 
 This repository uses [Git submodules] to manage UPM (Unity Package Manager)
 packages. **If you know Git well and how to deal with submodules,** simply
