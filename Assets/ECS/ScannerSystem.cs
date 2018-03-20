@@ -6,18 +6,23 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 
+// Scanner system
+// Moves old voxels to points where rays hit colliders.
+
 [UpdateAfter(typeof(VoxelAnimationSystem))]
 unsafe class ScannerSystem : JobComponentSystem
 {
-    // Groups used for querying components.
+    // Groups used for querying scanner/voxel components
     ComponentGroup _scannerGroup;
     ComponentGroup _voxelGroup;
 
-    // Used for sharing a counter between transfer jobs.
-    // Static member field isn't allowed in Burst, so use a pointer.
+    // Pointer used for sharing a counter between transfer jobs.
+    // Why pointer? A: In burst, loading from/storing to static member fields
+    // isn't allowed. So, we have to use a pointer to share a counter between
+    // jobs in a static-ish fashion
     int* _pTransformCount;
 
-    // Setup job: Set up raycast commands in a jobified way.
+    // Set-up job: Set up raycast commands in parallel.
     [ComputeJobOptimization]
     struct SetupJob : IJobParallelFor
     {
@@ -25,8 +30,9 @@ unsafe class ScannerSystem : JobComponentSystem
         public NativeArray<RaycastCommand> Commands;
 
         // Common parameters
+        public float3 Origin;
         public float3 Extent;
-        public int3 Resolution;
+        public int2 Resolution;
 
         public void Execute(int i)
         {
@@ -36,12 +42,12 @@ unsafe class ScannerSystem : JobComponentSystem
             var x = math.lerp(-Extent.x, Extent.x, (float)ix / Resolution.x);
             var y = math.lerp(-Extent.y, Extent.y, (float)iy / Resolution.y);
 
-            var p = new float3(x, y, -Extent.z);
+            var p = Origin + new float3(x, y, -Extent.z);
             Commands[i] = new RaycastCommand(p, new float3(0, 0, 1), Extent.z * 2);
         }
     }
 
-    // Transfer job: Transfers raycast results to voxels in a jobified way.
+    // Transfer job: Transfers raycast results to voxels in parallel.
     [ComputeJobOptimization]
     struct TransferJob : IJobParallelFor
     {
@@ -52,11 +58,11 @@ unsafe class ScannerSystem : JobComponentSystem
         [DeallocateOnJobCompletion] [ReadOnly]
         public NativeArray<RaycastHit> RaycastHits;
 
-        // Output array; Allowing random access.
+        // Output array; Not govened by parallel-for
         [NativeDisableParallelForRestriction]
         public ComponentDataArray<TransformMatrix> Transforms;
 
-        // Output counter; Shared between jobs via pointer.
+        // Transform counter; Shared between jobs via the pointer
         [NativeDisableUnsafePtrRestriction] public int* pCounter;
 
         // Common parameters
@@ -86,23 +92,24 @@ unsafe class ScannerSystem : JobComponentSystem
         }
     }
 
+    // Build a job chain with a given scanner.
     JobHandle BuildJobChain(float3 origin, Scanner scanner, JobHandle deps)
     {
+        Debug.Log(origin);
         // Transform output destination
         var transforms = _voxelGroup.GetComponentDataArray<TransformMatrix>();
         if (transforms.Length == 0) return deps;
 
-        // Shared counter initialization/update
         if (_pTransformCount == null)
         {
-            // Initialization
+            // Initialize the transform counter.
             _pTransformCount = (int*)UnsafeUtility.Malloc(
                 sizeof(int), sizeof(int), Allocator.Persistent);
             *_pTransformCount = 0;
         }
         else
         {
-            // Wrapping around for avoiding overflow
+            // Wrap around the transform counter to avoid overlfow.
             *_pTransformCount %= transforms.Length;
         }
 
@@ -113,18 +120,19 @@ unsafe class ScannerSystem : JobComponentSystem
         var commands = new NativeArray<RaycastCommand>(total, Allocator.TempJob);
         var hits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
 
-        // 1: Setup job
+        // 1: Set-up jobs
         var setupJob = new SetupJob {
             Commands = commands,
+            Origin = origin,
             Extent = scanner.Extent,
             Resolution = scanner.Resolution
         };
-        deps = setupJob.Schedule(total, 16, deps);
+        deps = setupJob.Schedule(total, 64, deps);
 
-        // 2: Raycast job
+        // 2: Raycast jobs
         deps = RaycastCommand.ScheduleBatch(commands, hits, 16, deps);
 
-        // 3: Transfer job
+        // 3: Transfer jobs
         var transferJob = new TransferJob {
             RaycastCommands = commands,
             RaycastHits = hits,
@@ -132,7 +140,7 @@ unsafe class ScannerSystem : JobComponentSystem
             Transforms = transforms,
             pCounter = _pTransformCount
         };
-        deps = transferJob.Schedule(total, 16, deps);
+        deps = transferJob.Schedule(total, 64, deps);
 
         return deps;
     }
@@ -154,6 +162,7 @@ unsafe class ScannerSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        // Build job chains for each scanner instance.
         var origins = _scannerGroup.GetComponentDataArray<Position>();
         var scanners = _scannerGroup.GetComponentDataArray<Scanner>();
 

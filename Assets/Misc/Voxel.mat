@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Instanced
+  m_Name: Voxel
   m_Shader: {fileID: 4800000, guid: bb77e142695c8b0428fa1f7c8498743d, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4

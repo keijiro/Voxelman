@@ -6,6 +6,7 @@ using Unity.Mathematics;
 
 // Jobified voxel animation system
 
+[UpdateAfter(typeof(VoxelBufferSystem))]
 class VoxelAnimationSystem : JobComponentSystem
 {
     [ComputeJobOptimization]
@@ -25,8 +26,8 @@ class VoxelAnimationSystem : JobComponentSystem
             var scale = matrix.Value.m0.x;
 
             // Move/Shrink.
-            pos += new float3(0.1f, -3, 0.3f) * (rand2 + 0.1f) * dt;
-            scale *= math.lerp(0.9f, 0.99f, rand1);
+            pos += new float3(0.1f, -2.0f, 0.3f) * (rand2 + 0.1f) * dt;
+            scale *= math.lerp(0.9f, 0.98f, rand1);
 
             // Build a new matrix.
             matrix = new TransformMatrix {
