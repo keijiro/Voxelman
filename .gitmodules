@@ -1,15 +1,15 @@
 [submodule "Packages/jp.keijiro.neolowman"]
 	path = Packages/jp.keijiro.neolowman
-	url = git@github.com:keijiro/NeoLowMan.git
+	url = https://github.com/keijiro/NeoLowMan.git
 	branch = upm
 [submodule "Packages/jp.keijiro.cmu-mocap"]
 	path = Packages/jp.keijiro.cmu-mocap
-	url = git@github.com:keijiro/CMUMocap.git
+	url = https://github.com/keijiro/CMUMocap.git
 	branch = upm
 [submodule "Packages/jp.keijiro.test-assets"]
 	path = Packages/jp.keijiro.test-assets
-	url = git@github.com:keijiro/jp.keijiro.test-assets.git
+	url = https://github.com/keijiro/jp.keijiro.test-assets.git
 [submodule "Packages/jp.keijiro.klak"]
 	path = Packages/jp.keijiro.klak
-	url = git@github.com:keijiro/Klak.git
+	url = https://github.com/keijiro/Klak.git
 	branch = upm
