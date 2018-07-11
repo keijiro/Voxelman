@@ -12,13 +12,13 @@ the maximum efficiency of multi-core processors.
 
 [Entity Component System]: https://github.com/Unity-Technologies/EntityComponentSystemSamples
 
-How to play with this thing
----------------------------
+System requirements
+-------------------
 
-### Download the beta Editor
+- Unity 2018.2 or later
 
-This example requires the beta build of Unity Editor. Please see the "What is
-in the build" section in README of the [ECS repository].
+How to play with this project
+-----------------------------
 
 ### Submodules
 
