@@ -23,7 +23,7 @@ unsafe class ScannerSystem : JobComponentSystem
     int* _pTransformCount;
 
     // Set-up job: Set up raycast commands in parallel.
-    [ComputeJobOptimization]
+    [Unity.Burst.BurstCompile]
     struct SetupJob : IJobParallelFor
     {
         // Output
@@ -48,7 +48,7 @@ unsafe class ScannerSystem : JobComponentSystem
     }
 
     // Transfer job: Transfers raycast results to voxels in parallel.
-    [ComputeJobOptimization]
+    [Unity.Burst.BurstCompile]
     struct TransferJob : IJobParallelFor
     {
         // Input arrays; Will be automatically deallocated.

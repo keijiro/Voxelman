@@ -9,7 +9,7 @@ using Unity.Mathematics;
 [UpdateAfter(typeof(VoxelBufferSystem))]
 class VoxelAnimationSystem : JobComponentSystem
 {
-    [ComputeJobOptimization]
+    [Unity.Burst.BurstCompile]
     struct VoxelAnimation : IJobProcessComponentData<Voxel, TransformMatrix>
     {
         public float dt;
@@ -22,8 +22,8 @@ class VoxelAnimationSystem : JobComponentSystem
             var rand2 = hash.Value01(2);
 
             // Extract the current position/scale.
-            var pos = matrix.Value.m3.xyz;
-            var scale = matrix.Value.m0.x;
+            var pos = matrix.Value.c3.xyz;
+            var scale = matrix.Value.c0.x;
 
             // Move/Shrink.
             pos += new float3(0.1f, -2.0f, 0.3f) * (rand2 + 0.1f) * dt;
@@ -32,10 +32,10 @@ class VoxelAnimationSystem : JobComponentSystem
             // Build a new matrix.
             matrix = new TransformMatrix {
                 Value = new float4x4(
-                    scale, 0, 0, 0,
-                    0, scale, 0, 0,
-                    0, 0, scale, 0,
-                    pos.x, pos.y, pos.z, 1
+                    new float4(scale, 0, 0, 0),
+                    new float4(0, scale, 0, 0),
+                    new float4(0, 0, scale, 0),
+                    new float4(pos.x, pos.y, pos.z, 1)
                 )
             };
         }
