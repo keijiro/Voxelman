@@ -4,8 +4,5 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes:
-  - enabled: 1
-    path: Assets/Voxelman.unity
-    guid: f7ad30e6407390846bf32a763f485eb2
+  m_Scenes: []
   m_configObjects: {}

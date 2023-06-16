@@ -1,20 +1,12 @@
-# Windows
 Thumbs.db
 Desktop.ini
-
-# macOS
 .DS_Store
-
-# Code Editors
-.idea
-.vscode
-*.csproj
-*.sln
 *.swp
 
-# Unity
 /Library
+/Logs
+/Recordings
 /Temp
+/UserSettings
 
-Assets/Plugins
-Assets/Plugins.meta
+/Assets/SceneDependencyCache

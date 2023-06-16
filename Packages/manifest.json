@@ -1,15 +1,22 @@
 {
   "dependencies": {
-    "com.unity.entities": "0.0.12-preview.8",
-    "com.unity.package-manager-ui": "1.9.11",
-    "com.unity.postprocessing": "2.0.7-preview",
+    "com.unity.entities.graphics": "1.0.10",
+    "com.unity.physics": "1.0.10",
+    "com.unity.render-pipelines.universal": "14.0.8",
+    "com.unity.test-framework": "1.1.33",
+    "jp.keijiro.cmu-mocap": "1.0.0",
+    "jp.keijiro.klak.motion": "1.0.2",
+    "jp.keijiro.neolowman": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
-    "com.unity.modules.audio": "1.0.0",
-    "com.unity.modules.director": "1.0.0",
-    "com.unity.modules.imgui": "1.0.0",
-    "com.unity.modules.particlesystem": "1.0.0",
-    "com.unity.modules.physics": "1.0.0",
-    "com.unity.modules.vr": "1.0.0"
+    "com.unity.modules.uielements": "1.0.0"
   },
-  "registry": "https://packages.unity.com"
+  "scopedRegistries": [
+    {
+      "name": "Keijiro",
+      "url": "https://registry.npmjs.com",
+      "scopes": [
+        "jp.keijiro"
+      ]
+    }
+  ]
 }
